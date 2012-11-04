@@ -10,3 +10,4 @@ xmonad-x86_64-linux
 *.swo
 *.backup
 *.errors
+history
