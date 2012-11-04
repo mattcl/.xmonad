@@ -10,7 +10,7 @@ import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
 import System.IO
 
-layout = tiled ||| Mirror tiled ||| Full ||| Grid ||| Accordion ||| Column 1.6 ||| OneBig (3/4) (3/4)
+layout = tiled ||| Mirror tiled ||| Full ||| Grid ||| Accordion ||| OneBig (3/4) (3/4)
     where
         tiled = Tall nmaster delta ratio
         nmaster = 1
