@@ -1,0 +1,6 @@
+#!/bin/sh
+setxkbmap -option caps:none
+
+synclient MaxTapTime=0
+
+exec /home/matt/.cabal/bin/xmonad

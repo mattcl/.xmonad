@@ -26,37 +26,29 @@ import System.IO
 
 myTopics :: [Topic]
 myTopics =
-    [ "work"
-    , "imvudev"
-    , "dev2"
-    , "standard"
-    , "vm"
-    , "chrome"
-    , "scratchdev"
-    , "webtest"
+    [ "web"
+    , "code"
+    , "cli"
+    , "cli 2"
+    , "cli 3"
+    , "cli 4"
+    , "gitg"
+    , "pidgin"
     , "music"
-    , "gem"
-    , "dashboard"
     ]
 
 myTopicConfig :: TopicConfig
 myTopicConfig = defaultTopicConfig
     { topicDirs = M.fromList $
-        [ ("scratchdev", "w/scratch")
+        [ ("web", "w/code")
         ]
     , defaultTopic = "work"
-    , defaultTopicAction = const $ spawn "firefox" >> spawn "konsole" >*> 2
+    , defaultTopicAction = const $ spawn "google-chrome"
     , topicActions = M.fromList $
-        [ ("work", spawn "firefox" >> spawn "konsole" >*> 2)
-        , ("imvudev", spawn "konsole")
-        , ("dev2", spawn "konsole")
-        , ("vm", spawn "vmware")
-        , ("chrome", spawn "google-chrome")
-        , ("scratchdev", spawnShellIn "scratch")
-        , ("webtest", spawn "google-chrome --remote 'http://localhost.imvu.com/runtests'")
-        , ("music", spawn "google-chrome --remote 'http://music.google.com'")
-        , ("gem", spawnShellIn "scratch/imvu-dev")
-        , ("dashboard", spawnShellIn "scratch/imvu_dashboard")
+        [ ("web", spawn "google-chrome")
+        , ("code", spawn "subl")
+        , ("cli", spawn "konsole --workdir '~/code/katsu'" >*> 4)
+        , ("gitg", spawn "gitg")
         ]
     }
 
@@ -66,21 +58,25 @@ spawnShell = currentTopicDir myTopicConfig >>= spawnShellIn
 spawnShellIn :: Dir -> X ()
 spawnShellIn dir = spawn $ "konsole --workdir " ++ dir
 
-layout = onWorkspace "work" (OneBig (3/4) (3/4) ||| def) $
+layout = onWorkspace "web" (noBorders Full ||| tiled ||| Mirror tiled) $
+         onWorkspace "code" (noBorders Full ||| tiled ||| Mirror tiled ||| Grid ||| Accordion) $
+         onWorkspace "cli" primaryCli $
          def
     where
         def = tiled ||| Mirror tiled ||| noBorders Full ||| Grid ||| Accordion
+        primaryCli = Mirror cliLayout ||| tiled ||| noBorders Full ||| Grid ||| Accordion
         tiled = Tall nmaster delta ratio
+        cliLayout = Tall cliNMaster delta cliRatio
         nmaster = 1
         ratio = 1/2
+        cliNMaster = 2
+        cliRatio = 2/3
         delta = 3/100
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList
-        [ ((modm .|. controlMask, xK_n), appendFilePrompt defaultXPConfig "/home/mchunlum/NOTES")
-        , ((modm .|. shiftMask, xK_g), windowPromptGoto defaultXPConfig { autoComplete = Just 500000 } )
+        [ ((modm .|. shiftMask, xK_g), windowPromptGoto defaultXPConfig { autoComplete = Just 500000 } )
         , ((modm .|. shiftMask, xK_b), windowPromptBring defaultXPConfig { autoComplete = Just 500000 } )
         , ((modm .|. controlMask, xK_x), shellPrompt defaultXPConfig)
-        , ((modm, xK_q), spawn "/home/mchunlum/bin/xmonad --recompile; /home/mchunlum/bin/xmonad --restart")
         , ((modm, xK_a), currentTopicAction myTopicConfig)
         , ((modm, xK_g), promptedGoto)
         , ((modm .|. shiftMask, xK_g), promptedGoto)
@@ -100,17 +96,29 @@ spawnToWorkspace program workspace = spawn program >> (windows $ W.greedyView wo
 
 newKeys x = myKeys x `M.union` keys defaultConfig x
 
-myConfig = do
+bar = "xmobar"
+
+barPP = xmobarPP { ppCurrent = xmobarColor "green" "" .shorten 100 }
+
+toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_b)
+
+main :: IO ()
+main = do
     checkTopicConfig myTopics myTopicConfig
-    return $ defaultConfig
+    xmproc <- spawnPipe "/home/matt/.cabal/bin/xmobar /home/matt/.xmobarrc"
+    xmonad $ defaultConfig
         { terminal = "konsole"
         , workspaces = myTopics
-		, borderWidth = 2
-		, focusedBorderColor = "#cd8b00"
-        , layoutHook = layout
+        , borderWidth = 2
+        , focusedBorderColor = "#cd8b00"
+        , layoutHook = avoidStruts $ layout
+        , logHook = dynamicLogWithPP xmobarPP
+            { ppOutput = hPutStrLn xmproc
+            , ppTitle = xmobarColor "orange" "" .shorten 100
+            , ppCurrent = xmobarColor "orange" "" .wrap "[" "]"
+            }
         , keys = newKeys
+        , modMask = mod4Mask
         , startupHook = return ()
         }
 
-main :: IO ()
-main = xmonad =<< myConfig
