@@ -1,6 +1,6 @@
 #!/bin/sh
 setxkbmap -option caps:none
 
-synclient MaxTapTime=0
+gnome-keyring-daemon --start --components=gpg,pkcs11,secrets,ssh
 
 exec /home/matt/.cabal/bin/xmonad
