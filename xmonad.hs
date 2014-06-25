@@ -34,7 +34,7 @@ myTopics =
     , "cli 3"
     , "cssh"
     , "pidgin"
-    , "music"
+    , "deployment"
     ]
 
 myTopicConfig :: TopicConfig
@@ -50,6 +50,7 @@ myTopicConfig = defaultTopicConfig
         , ("remotes", spawn "konsole --profile ec2")
         , ("cli", spawn "konsole --workdir '~/'" >*> 4)
         , ("pidgin", spawn "pidgin")
+        , ("deployment", spawn "konsole --profile important")
         ]
     }
 
