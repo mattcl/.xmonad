@@ -47,7 +47,7 @@ myTopicConfig = defaultTopicConfig
     , topicActions = M.fromList $
         [ ("web", spawn "google-chrome")
         , ("code", spawn "subl")
-        , ("cli", spawn "konsole --workdir '~/code/katsu'" >*> 4)
+        , ("cli", spawn "konsole --workdir '~/code/zununu/katsu'" >*> 4)
         , ("gitg", spawn "gitg")
         ]
     }
